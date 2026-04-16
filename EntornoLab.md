@@ -120,3 +120,26 @@ Python 3 es una herramienta esencial para el desarrollo de scripts de explotaci�
    - `File -> Open`
 3. Comprobar que el programa se carga correctamente y queda en estado de pausa (paused).
 
+### Instalación de IDA Free en Windows 10
+
+**IDA Free** es una herramienta de ingeniería inversa que permite analizar binarios y comprender su funcionamiento interno, siendo especialmente útil en el estudio de vulnerabilidades.
+
+### Descarga
+
+1. Acceder a la página oficial de IDA Free: https://hex-rays.com/ida-free/
+2. Descargar la versión gratuita (**IDA Freeware**) para Windows.
+
+### Instalación
+
+1. Ejecutar el instalador descargado.
+2. Aceptar los términos de licencia.
+3. Seleccionar la ruta de instalación (se puede dejar por defecto).
+4. Completar el asistente de instalación.
+
+### Ejecución
+
+1. Ejecutar **IDA Free** desde el acceso directo o el menú de inicio.
+2. Abrir un archivo ejecutable:
+   - `File -> Open`
+   - Seleccionar `vulnserver.exe`
+
