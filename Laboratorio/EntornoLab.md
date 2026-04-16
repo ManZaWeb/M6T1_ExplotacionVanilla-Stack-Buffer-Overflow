@@ -142,3 +142,23 @@ Python 3 es una herramienta esencial para el desarrollo de scripts de explotaci�
 2. Abrir un archivo ejecutable:
    - `File -> Open`
    - Seleccionar `vulnserver.exe`
+
+## Instalaci처n de herramientas en Kali
+
+### Instalaci처n de Netcat
+
+**Netcat** es una herramienta fundamental en entornos de ciberseguridad, utilizada para la conexi처n a servicios, transferencia de datos y pruebas de explotaci처n.
+
+### Verificaci처n previa
+
+En Kali Linux, Netcat suele venir preinstalado. Para comprobarlo:
+
+```bash
+nc -h
+```
+
+## En caso de no estar instalado, ejecutar:
+
+sudo apt update
+sudo apt install netcat -y
+
