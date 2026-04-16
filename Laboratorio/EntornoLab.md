@@ -56,7 +56,7 @@ Con el objetivo de disponer de un servicio vulnerable sobre el que realizar prue
 3.Ejecuar vulnerserver
   vulnserver.exe
 
-## Instalaci처n de Python 3
+## Instalaci처n de Python 3 en Windows 10
 
 Python 3 es una herramienta esencial para el desarrollo de scripts de explotaci처n y automatizaci처n durante el laboratorio.
 
@@ -80,7 +80,7 @@ Python 3 es una herramienta esencial para el desarrollo de scripts de explotaci�
    ```bash
    python --version
 
-## Instalaci처n de herramientas
+## Instalaci처n de herramientas en Windows 10
 
 ### Immunity Debugger
 
