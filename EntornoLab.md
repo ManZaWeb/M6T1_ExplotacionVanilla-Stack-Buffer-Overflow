@@ -6,8 +6,8 @@ En esta sección se describen los pasos necesarios para su instalación y correc
 
 Para la creación del entorno de laboratorio, se utilizarán dos máquinas virtuales:
 
-- **Kali Linux**: utilizada como máquina atacante.
-- **Windows 10**: utilizada como máquina víctima.
+- **Kali Linux**
+- **Windows 10**
 
 ### Requisitos previos
 
