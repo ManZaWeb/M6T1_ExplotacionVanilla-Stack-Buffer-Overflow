@@ -11,14 +11,13 @@ vulnserver.exe
 
 <img width="1479" height="417" alt="image" src="https://github.com/user-attachments/assets/21ccfd29-e783-47cc-9dea-05c3019d231e" />
 
-Si todo esta correcto aparecera el siguiente mensaje en la consola:
+Si todo es correcto aparecera el siguiente mensaje en la consola:
 
 <img width="1304" height="248" alt="image" src="https://github.com/user-attachments/assets/8050c03a-878f-4a3d-a83d-aaedcbb6fa67" />
 
 
-## Comprobación de conexión
+## Comprobación de la conexión
 
-### Comprobación de conexión
 
 Desde nuestra máquina Kali, comprobaremos la conectividad con el servicio **VulnServer** utilizando Netcat.
 
