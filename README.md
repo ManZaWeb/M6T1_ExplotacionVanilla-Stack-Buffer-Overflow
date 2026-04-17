@@ -52,9 +52,41 @@ Para ello, utilizamos el comando `HELP`:
 
 <img width="1902" height="485" alt="image" src="https://github.com/user-attachments/assets/40663f57-1847-40c2-9ec4-4dc20ef4f038" />
 
-Que nos proporciona una serie de comandos disponibles.
+## Análisis estático del binario con IDA
 
-Comprobamos el comando TRUN:
+Antes de realizar el fuzzing, se ha llevado a cabo un análisis estático del binario `vulnserver.exe` utilizando **IDA Free**, con el objetivo de identificar posibles puntos vulnerables en la aplicación.
+
+### Análisis de imports
+
+A través de la vista de imports (`View -> Open subviews -> Imports`), se han identificado diversas funciones de la librería estándar de C (`msvcrt`) que son potencialmente inseguras:
+
+```text
+strcpy
+strncpy
+memcpy
+printf
+strlen
+````
+
+<img width="1919" height="1002" alt="image" src="https://github.com/user-attachments/assets/e383cd52-119e-4ab4-a29b-ab38b3b93d82" />
+
+Estas funciones no realizan validación de tamaño en los buffers, lo que las convierte en candidatas a provocar desbordamientos de memoria.
+
+### Análisis de funciones
+
+A través de la vista de funciones (`Functions`) y el pseudocódigo generado, se ha inspeccionado el flujo de ejecución del programa, prestando especial atención a las funciones que gestionan entradas del usuario.
+
+Durante este análisis, se ha identificado que el comando **TRUN** es procesado por una función susceptible de recibir datos sin validación adecuada de longitud.
+
+### Hipótesis de vulnerabilidad
+
+El comando **TRUN** se considera un candidato potencial a vulnerabilidad de tipo **Stack Buffer Overflow**, ya que:
+
+- Acepta entrada controlada por el usuario.
+- No parece implementar mecanismos de validación de tamaño.
+- Hace uso de funciones inseguras de manejo de memoria.
+
+
 
 
 
