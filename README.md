@@ -263,10 +263,64 @@ Esto confirma que:
 El desbordamiento de buffer alcanza el registro EIP en el byte 2006.
 
 
+## Control del registro EIP
+
+Una vez determinado el offset exacto necesario para sobrescribir el registro EIP (2006 bytes), se procede a verificar el control total del flujo de ejecución.
+
+Para ello, se construye un payload específico que sobrescribe EIP con un valor controlado.
+
+---
+
+### Construcción del payload
+
+El buffer utilizado es:
+
+```python
+buffer = b'A' * 2006 + b'BBBB'
+````
+
+### Ejecución del script
+
+Se ha utilizado el script Python3ControlEIP.py proporcionado por TheMalwareGuardian para enviar el payload al servicio vulnerable:
+
+<img width="814" height="194" alt="image" src="https://github.com/user-attachments/assets/620dfd0f-7f5d-4a96-a4d4-59f97a77e77c" />
 
 
+La aplicación vulnerable se detiene en Immunity Debugger mostrando:
 
 
+<img width="1912" height="999" alt="image" src="https://github.com/user-attachments/assets/8fcff928-73fa-49b7-93d0-f538dc0ba7f9" />
+
+
+```text
+Acces violation when executing 42424242
+```
+
+El valor 0x42424242 corresponde a la cadena ASCII 'BBBB', lo que confirma que:
+
+- El offset calculado (2006 bytes) es correcto.
+- El registro EIP ha sido sobrescrito de forma controlada.
+- Se tiene control total sobre el flujo de ejecución del programa.
+
+
+## Identificación de Bad Characters
+
+Antes de generar el shellcode final, es necesario identificar los **bad characters**, es decir, aquellos bytes que pueden corromper el payload durante su procesamiento por la aplicación vulnerable.
+
+Estos caracteres pueden ser interpretados de forma especial por el programa (por ejemplo, como terminadores de cadena), provocando truncamiento o modificación de los datos enviados.
+
+---
+
+### Caracteres problemáticos comunes
+
+Algunos de los bad characters más habituales son:
+
+```text id="9x4j2n"
+\x00 → Null byte
+\x0A → New Line
+\x0D → Carriage Return
+\xFF → Form Feed
+````
 
 
 
