@@ -315,12 +315,55 @@ Estos caracteres pueden ser interpretados de forma especial por el programa (por
 
 Algunos de los bad characters más habituales son:
 
-```text id="9x4j2n"
+```text
 \x00 → Null byte
 \x0A → New Line
 \x0D → Carriage Return
 \xFF → Form Feed
 ````
+
+### Generación del bytearray
+
+Para identificar estos caracteres, se genera una secuencia de todos los bytes posibles (0x00 a 0xFF).
+
+En Immunity Debugger, utilizamos Mona:
+
+```bash
+!mona bytearray -b "\x00"
+```
+
+Esto genera este archivo:
+
+<img width="1417" height="705" alt="image" src="https://github.com/user-attachments/assets/664dede5-ed8c-434e-892b-a36e515f9756" />
+
+
+### Ejecución del script
+
+Para la realización de este apartado utilizamos el script Python3FindBadChars.py proporcionado por TheMalwareGuardian:
+
+<img width="1912" height="160" alt="image" src="https://github.com/user-attachments/assets/b456aa05-bae4-4be0-ac21-7e6508a9a68c" />
+
+En InmunnityDebbuger comprobamos con mona:
+
+```bash
+!mona compare -f C:\mona\vulnserver\bytearray.bin -a ESP
+```
+
+<img width="1514" height="642" alt="image" src="https://github.com/user-attachments/assets/ab554441-6b13-4533-9c3d-6a489a016624" />
+
+El resultado mostrado por Mona es:
+ 
+```text
+Corruption after 0 bytes
+Badchars: 00
+```
+
+Del análisis se concluye que:
+
+- El único bad character es: \x00
+- No se detecta corrupción en el resto de bytes
+- Los caracteres \x01 a \xFF son seguros para su uso en el payload
+
 
 
 
