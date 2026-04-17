@@ -196,6 +196,73 @@ Este comportamiento indica que:
 
 Confirmando que existe una vulnerabilidad de tipo Stack Buffer Overflow.
 
+## Descubrimiento del offset del registro EIP
+
+Una vez identificado el crash mediante fuzzing y confirmado el control parcial del registro EIP, el siguiente paso consiste en determinar el número exacto de bytes necesarios para sobrescribir dicho registro.
+
+Para esta tarea utilizaremos el script **Python3EIPOffsetDiscovery.py**, proporcionado por TheMalwareGuardian. No obstante, es necesario adaptar el patrón de entrada a nuestras necesidades, generándolo previamente con la herramienta **Mona** dentro de Immunity Debugger.
+
+---
+
+### Generación del patrón con Mona
+
+Desde la consola de Immunity Debugger, ejecutamos:
+
+```bash
+!mona pattern_create 3000
+```
+Este comando genera un patrón cíclico de 3000 bytes, suficiente para alcanzar y sobrescribir el registro EIP.
+
+El patrón se guarda automáticamente en la siguiente ruta:
+
+```text
+C:\mona\vulnserver\pattern.txt
+````
+
+<img width="1430" height="718" alt="image" src="https://github.com/user-attachments/assets/aa4be400-4071-435a-99fd-133c964d7407" />
+
+
+Se debe copiar la cadena correspondiente a la sección ASCII y sustituirla en el script de Python.
+
+### Ejecución del script
+
+Se ejecuta el script contra el servicio vulnerable:
+
+
+<img width="1919" height="237" alt="image" src="https://github.com/user-attachments/assets/909b5089-6181-4f7d-9968-ad489aaadc54" />
+
+
+Esto provocará nuevamente el crash de la aplicación, pero en esta ocasión el valor del registro EIP contendrá una parte del patrón.
+
+<img width="1919" height="1001" alt="image" src="https://github.com/user-attachments/assets/6328e3d8-1c15-4914-8c5a-4b9c383f4808" />
+
+En este caso:
+
+```text
+EIP = 396F4338
+```
+
+### Cálculo del offset
+
+Para determinar la posición exacta del valor encontrado en EIP dentro del patrón, se utiliza Mona:
+
+````bash
+!mona pattern_offset 396f4338
+````
+
+Resultado:
+
+<img width="1144" height="344" alt="image" src="https://github.com/user-attachments/assets/a09ff828-0281-4571-bf6a-980215de0346" />
+
+
+Position found at offset 2006
+
+Esto confirma que:
+
+El desbordamiento de buffer alcanza el registro EIP en el byte 2006.
+
+
+
 
 
 
