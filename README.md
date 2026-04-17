@@ -364,6 +364,29 @@ Del análisis se concluye que:
 - No se detecta corrupción en el resto de bytes
 - Los caracteres \x01 a \xFF son seguros para su uso en el payload
 
+## Redirección de ejecución mediante JMP ESP
+
+Una vez que se ha conseguido el control del registro EIP y se han identificado los bad characters, el siguiente objetivo es redirigir la ejecución hacia el shellcode.
+
+
+### ¿Por qué JMP ESP?
+
+El registro **ESP (Extended Stack Pointer)** apunta a la parte superior de la pila (stack), donde se encuentra nuestro payload.
+
+Si logramos que el registro **EIP** apunte a una instrucción `JMP ESP`, el flujo de ejecución saltará directamente al contenido del stack, permitiendo ejecutar el código controlado por el atacante.
+
+
+### Identificación de la instrucción JMP ESP
+
+Para localizar una instrucción `JMP ESP`, se utiliza la herramienta Mona dentro de Immunity Debugger.
+
+En primer lugar, se analizan los módulos cargados:
+
+```bash
+!mona modules
+```
+
+
 
 
 
