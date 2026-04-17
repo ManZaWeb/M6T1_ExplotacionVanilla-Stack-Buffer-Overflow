@@ -343,7 +343,7 @@ Para la realización de este apartado utilizamos el script **Python3FindBadChars
 
 <img width="1912" height="160" alt="image" src="https://github.com/user-attachments/assets/b456aa05-bae4-4be0-ac21-7e6508a9a68c" />
 
-En InmunnityDebbuger comprobamos con mona:
+En ImmunnityDebbuger comprobamos con Mona:
 
 ```bash
 !mona compare -f C:\mona\vulnserver\bytearray.bin -a ESP
