@@ -254,8 +254,9 @@ Resultado:
 
 <img width="1144" height="344" alt="image" src="https://github.com/user-attachments/assets/a09ff828-0281-4571-bf6a-980215de0346" />
 
-
-Position found at offset 2006
+```text
+Found in cyclic pattern at position 2006
+```
 
 Esto confirma que:
 
